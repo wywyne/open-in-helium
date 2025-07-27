@@ -1,17 +1,40 @@
 'use strict';
 
+let port;
+try {
+  port = document.getElementById('oichr-port');
+  port.remove();
+}
+catch (e) {
+  port = document.createElement('span');
+  port.id = 'oichr-port';
+  document.documentElement.append(port);
+}
+port.addEventListener('user-action', e => {
+  const {close, url} = e.detail;
+
+  if (url) {
+    chrome.runtime.sendMessage({
+      cmd: 'open-in',
+      url,
+      close
+    });
+  }
+});
+
 const config = {
-  button: 0,
-  altKey: true,
-  ctrlKey: false,
-  shiftKey: true,
-  metaKey: false,
-  enabled: false,
-  hosts: [],
-  urls: [],
-  keywords: [],
-  reverse: false,
-  topRedict: false
+  'button': 0,
+  'altKey': true,
+  'ctrlKey': false,
+  'shiftKey': true,
+  'metaKey': false,
+  'enabled': false,
+  'hosts': [],
+  'urls': [],
+  'keywords': [],
+  'reverse': false,
+  'topRedict': false,
+  'custom-script': ''
 };
 
 const validate = (a, callback, isTop = false) => {
@@ -57,6 +80,8 @@ const validate = (a, callback, isTop = false) => {
   }
 };
 chrome.storage.local.get(config, prefs => {
+  port.dataset.script = prefs['custom-script'];
+
   Object.assign(config, prefs);
   // managed
   chrome.storage.managed.get({
@@ -123,6 +148,9 @@ chrome.storage.onChanged.addListener(e => {
   Object.keys(e).forEach(n => {
     config[n] = e[n].newValue;
   });
+  if (e['custom-script']) {
+    port.dataset.script = e['custom-script'].newValue;
+  }
 });
 
 document.addEventListener('click', e => {

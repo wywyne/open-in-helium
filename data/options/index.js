@@ -8,20 +8,21 @@ function get(id) {
 function restore() {
   // Use default value color = 'red' and likesColor = true.
   chrome.storage.local.get({
-    path: '',
-    enabled: false,
-    altKey: true,
-    shiftKey: true,
-    ctrlKey: false,
-    metaKey: false,
-    button: 0,
-    faqs: true,
-    closeme: false,
-    multiple: app.multiple,
-    hosts: [],
-    urls: [],
-    reverse: false,
-    topRedict: false
+    'path': '',
+    'enabled': false,
+    'altKey': true,
+    'shiftKey': true,
+    'ctrlKey': false,
+    'metaKey': false,
+    'button': 0,
+    'faqs': true,
+    'closeme': false,
+    'multiple': app.multiple,
+    'hosts': [],
+    'urls': [],
+    'reverse': false,
+    'topRedict': false,
+    'custom-script': ''
   }, prefs => {
     get('path').value = prefs.path;
     get('enabled').checked = prefs.enabled;
@@ -37,6 +38,7 @@ function restore() {
     get('urls').value = prefs.urls.join(', ');
     get('reverse').checked = prefs.reverse;
     get('topRedict').checked = prefs.topRedict;
+    get('custom-script').value = prefs['custom-script'];
   });
 }
 document.addEventListener('DOMContentLoaded', restore);
@@ -68,14 +70,15 @@ function save() {
     faqs,
     closeme,
     multiple,
-    hosts: hosts.split(/\s*,\s*/).map(s => s.replace('http://', '')
+    reverse,
+    topRedict,
+    'hosts': hosts.split(/\s*,\s*/).map(s => s.replace('http://', '')
       .replace('https://', '')
       .split('/')[0].trim())
       .filter((h, i, l) => h && l.indexOf(h) === i),
-    urls: urls.split(/\s*,\s*/).filter(s => s.startsWith('http') || s.startsWith('file'))
+    'urls': urls.split(/\s*,\s*/).filter(s => s.startsWith('http') || s.startsWith('file'))
       .filter((h, i, l) => h && l.indexOf(h) === i),
-    reverse,
-    topRedict
+    'custom-script': get('custom-script').value
   }, () => {
     restore();
     const status = get('status');

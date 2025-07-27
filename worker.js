@@ -1,4 +1,4 @@
-/* globals importScripts, app */
+/* global importScripts, app */
 
 importScripts('./config.js');
 
@@ -31,7 +31,6 @@ const os = {
   mac: navigator.userAgent.indexOf('Mac') !== -1,
   linux: navigator.userAgent.indexOf('Linux') !== -1
 };
-const isFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
 function error(response) {
   notify(`An error occurred:
@@ -178,17 +177,17 @@ chrome.action.onClicked.addListener(() => {
       title: app.locale.current,
       contexts: ['link'],
       documentUrlPatterns: ['*://*/*']
-    });
+    }, () => chrome.runtime.lastError);
     chrome.contextMenus.create({
       id: 'open-all',
       title: app.locale.all,
       contexts: ['action']
-    });
+    }, () => chrome.runtime.lastError);
     chrome.contextMenus.create({
       id: 'open-call',
       title: app.locale.call,
       contexts: ['action']
-    });
+    }, () => chrome.runtime.lastError);
   };
   chrome.runtime.onInstalled.addListener(callback);
   chrome.runtime.onStartup.addListener(callback);
@@ -213,6 +212,9 @@ chrome.contextMenus.onClicked.addListener(info => {
 chrome.runtime.onMessage.addListener((request, sender) => {
   if (request.cmd === 'open-in') {
     open([request.url], [sender.tab.id]);
+    if (request.close) {
+      chrome.tabs.remove(sender.tab.id);
+    }
   }
 });
 
