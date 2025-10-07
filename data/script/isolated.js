@@ -192,3 +192,9 @@ document.addEventListener('click', e => {
     }
   }
 }, true);
+
+chrome.runtime.onMessage.addListener(request => {
+  if (request.method === 'notify') {
+    alert(request.message);
+  }
+});

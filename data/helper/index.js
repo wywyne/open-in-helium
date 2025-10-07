@@ -15,7 +15,9 @@ else if (navigator.userAgent.indexOf('Linux') !== -1) {
 document.body.dataset.os = (os === 'mac' || os === 'linux') ? 'linux' : 'windows';
 
 if (['Lin', 'Win', 'Mac'].indexOf(navigator.platform.substr(0, 3)) === -1) {
-  window.alert('Sorry! The "native client" only supports the following operating systems at the moment:\n\nWindows, Mac, and Linux');
+  window.alert(`Sorry! The "native client" only supports the following operating systems at the moment:
+
+Windows, Mac, and Linux`);
 }
 
 const notify = (() => {

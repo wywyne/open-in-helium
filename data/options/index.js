@@ -5,9 +5,16 @@ function get(id) {
   return document.getElementById(id);
 }
 
-function restore() {
+const notify = message => {
+  const status = get('status');
+  status.textContent = message;
+  clearTimeout(notify.id);
+  notify.id = setTimeout(() => status.textContent = '', 750);
+};
+
+async function restore() {
   // Use default value color = 'red' and likesColor = true.
-  chrome.storage.local.get({
+  const prefs = await chrome.storage.local.get({
     'path': '',
     'enabled': false,
     'altKey': true,
@@ -23,27 +30,26 @@ function restore() {
     'reverse': false,
     'topRedict': false,
     'custom-script': ''
-  }, prefs => {
-    get('path').value = prefs.path;
-    get('enabled').checked = prefs.enabled;
-    get('altKey').checked = prefs.altKey;
-    get('shiftKey').checked = prefs.shiftKey;
-    get('ctrlKey').checked = prefs.ctrlKey;
-    get('metaKey').checked = prefs.metaKey;
-    get('button').selectedIndex = prefs.button;
-    get('faqs').checked = prefs.faqs;
-    get('closeme').checked = prefs.closeme;
-    get('multiple').checked = prefs.multiple;
-    get('hosts').value = prefs.hosts.join(', ');
-    get('urls').value = prefs.urls.join(', ');
-    get('reverse').checked = prefs.reverse;
-    get('topRedict').checked = prefs.topRedict;
-    get('custom-script').value = prefs['custom-script'];
   });
+  get('path').value = prefs.path;
+  get('enabled').checked = prefs.enabled;
+  get('altKey').checked = prefs.altKey;
+  get('shiftKey').checked = prefs.shiftKey;
+  get('ctrlKey').checked = prefs.ctrlKey;
+  get('metaKey').checked = prefs.metaKey;
+  get('button').selectedIndex = prefs.button;
+  get('faqs').checked = prefs.faqs;
+  get('closeme').checked = prefs.closeme;
+  get('multiple').checked = prefs.multiple;
+  get('hosts').value = prefs.hosts.join(', ');
+  get('urls').value = prefs.urls.join(', ');
+  get('reverse').checked = prefs.reverse;
+  get('topRedict').checked = prefs.topRedict;
+  get('custom-script').value = prefs['custom-script'];
 }
 document.addEventListener('DOMContentLoaded', restore);
 
-function save() {
+async function save() {
   const path = get('path').value;
   const enabled = get('enabled').checked;
   const altKey = get('altKey').checked;
@@ -59,7 +65,7 @@ function save() {
   const reverse = get('reverse').checked;
   const topRedict = get('topRedict').checked;
 
-  chrome.storage.local.set({
+  await chrome.storage.local.set({
     path,
     enabled,
     altKey,
@@ -79,12 +85,9 @@ function save() {
     'urls': urls.split(/\s*,\s*/).filter(s => s.startsWith('http') || s.startsWith('file'))
       .filter((h, i, l) => h && l.indexOf(h) === i),
     'custom-script': get('custom-script').value
-  }, () => {
-    restore();
-    const status = get('status');
-    status.textContent = 'Options saved.';
-    setTimeout(() => status.textContent = '', 750);
   });
+  restore();
+  notify('Options saved.');
 }
 get('save').addEventListener('click', save);
 
@@ -96,9 +99,7 @@ get('support').addEventListener('click', () => chrome.tabs.create({
 // Factory Reset
 get('reset').addEventListener('click', e => {
   if (e.detail === 1) {
-    const status = get('status');
-    window.setTimeout(() => status.textContent = '', 750);
-    status.textContent = 'Double-click to reset!';
+    notify('Double-click to reset!');
   }
   else {
     localStorage.clear();

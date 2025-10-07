@@ -1,11 +1,14 @@
-/* global importScripts, app */
+/* global app */
 
-importScripts('./config.js');
+if (typeof importScripts !== 'undefined') {
+  self.importScripts('./config.js');
+}
 
-const notify = (msg, b = 'E') => chrome.tabs.query({
-  currentWindow: true,
-  active: true
-}).then(t => {
+const notify = async (msg, b = 'E') => {
+  const [t] = await chrome.tabs.query({
+    currentWindow: true,
+    active: true
+  });
   chrome.action.setBadgeText({
     tabId: t.id,
     text: b
@@ -14,15 +17,27 @@ const notify = (msg, b = 'E') => chrome.tabs.query({
     tabId: t.id,
     title: msg
   });
-});
+  chrome.tabs.sendMessage(t.id, {
+    method: 'notify',
+    message: msg
+  });
+};
 
 // Badge Color
 {
-  const once = () => chrome.storage.local.get({
-    'badge-color': '#c2175b'
-  }, prefs => chrome.action.setBadgeBackgroundColor({
-    color: prefs['badge-color']
-  }));
+  const once = async () => {
+    if (once.done) {
+      return;
+    }
+    once.done = true;
+
+    const prefs = await chrome.storage.local.get({
+      'badge-color': '#c2175b'
+    });
+    chrome.action.setBadgeBackgroundColor({
+      color: prefs['badge-color']
+    });
+  };
   chrome.runtime.onInstalled.addListener(once);
   chrome.runtime.onStartup.addListener(once);
 }
@@ -36,34 +51,32 @@ function error(response) {
   notify(`An error occurred:
 
 Exit Code: ${response.code}
-Output: ${response.stdout}
-Error: ${response.stderr}`);
+Output:    ${response.stdout}
+Error:     ${response.stderr}`);
 }
 
-function response(res, success = () => {}) {
+async function response(res, success = () => {}) {
   // windows batch file returns 1
   if (res && (res.code !== 0 && (res.code !== 1 || res.stderr !== ''))) {
     error(res);
   }
   else if (!res) {
-    chrome.tabs.query({
+    const tabs = await chrome.tabs.query({
       url: chrome.runtime.getURL('data/helper/index.html')
-    }, tabs => {
-      if (tabs && tabs.length) {
-        chrome.tabs.update(tabs[0].id, {
-          active: true
-        }, () => {
-          chrome.windows.update(tabs[0].windowId, {
-            focused: true
-          });
-        });
-      }
-      else {
-        chrome.tabs.create({
-          url: 'data/helper/index.html'
-        });
-      }
     });
+    if (tabs && tabs.length) {
+      chrome.tabs.update(tabs[0].id, {
+        active: true
+      });
+      chrome.windows.update(tabs[0].windowId, {
+        focused: true
+      });
+    }
+    else {
+      chrome.tabs.create({
+        url: 'data/helper/index.html'
+      });
+    }
   }
   else {
     success();
@@ -104,74 +117,77 @@ function find(callback) {
 }
 
 
-const open = (urls, closeIDs = []) => {
-  chrome.storage.local.get({
+const open = async (urls, closeIDs = []) => {
+  const prefs = await chrome.storage.local.get({
     path: null,
     closeme: false
-  }, prefs => {
-    const close = () => {
-      if (prefs.closeme && closeIDs.length) {
-        chrome.tabs.remove(closeIDs);
-      }
-    };
-    if (os.mac) {
-      if (prefs.path) {
-        const length = app.runtime.mac.args.length;
-        app.runtime.mac.args[length - 1] = prefs.path;
-      }
-      exec('open', [...app.runtime.mac.args, ...urls], r => response(r, close));
+  });
+  const close = () => {
+    if (prefs.closeme && closeIDs.length) {
+      chrome.tabs.remove(closeIDs);
     }
-    else if (os.linux) {
-      exec(prefs.path || app.runtime.linux.name, urls, r => response(r, close));
+  };
+  if (os.mac) {
+    if (prefs.path) {
+      const length = app.runtime.mac.args.length;
+      app.runtime.mac.args[length - 1] = prefs.path;
+    }
+    exec('open', [...app.runtime.mac.args, ...urls], r => response(r, close));
+  }
+  else if (os.linux) {
+    exec(prefs.path || app.runtime.linux.name, urls, r => response(r, close));
+  }
+  else {
+    if (prefs.path) {
+      exec(prefs.path, [...(app.runtime.windows.args2 || []), ...urls], r => response(r, close));
     }
     else {
-      if (prefs.path) {
-        exec(prefs.path, [...(app.runtime.windows.args2 || []), ...urls], r => response(r, close));
-      }
-      else {
-        // Firefox is not detaching the process on Windows
-        const args = [...app.runtime.windows.args];
-        args[1] = args[1].replace('start', navigator.userAgent.indexOf('Firefox') !== -1 ? 'start /WAIT' : 'start');
-        args[2] = args[2].replace('%url;', urls.join(' '));
+      // Firefox is not detaching the process on Windows
+      const args = [...app.runtime.windows.args];
+      args[1] = args[1].replace('start', navigator.userAgent.indexOf('Firefox') !== -1 ? 'start /WAIT' : 'start');
+      args[2] = args[2].replace('%url;', urls.join(' '));
 
-        exec(app.runtime.windows.name, args, res => {
-          // use old method
-          if (res && res.code !== 0) {
-            find(() => open(urls, closeIDs));
-          }
-          else {
-            response(res, close);
-          }
-        }, {windowsVerbatimArguments: true});
-      }
+      exec(app.runtime.windows.name, args, res => {
+        // use old method
+        if (res && res.code !== 0) {
+          find(() => open(urls, closeIDs));
+        }
+        else {
+          response(res, close);
+        }
+      }, {windowsVerbatimArguments: true});
     }
-  });
+  }
 };
 
-function delayOpen(tabs) {
-  chrome.storage.local.get({
+async function delayOpen(tabs) {
+  const prefs = await chrome.storage.local.get({
     multiple: app.multiple
-  }, prefs => {
-    if (prefs.multiple) {
-      return open(tabs.map(t => t.url), tabs.map(t => t.id));
-    }
-    const tab = tabs.shift();
-    if (tab) {
-      open([tab.url], [tab.id]);
-      setTimeout(delayOpen, 500, tabs);
-    }
   });
+  if (prefs.multiple) {
+    return open(tabs.map(t => t.url), tabs.map(t => t.id));
+  }
+  for (const tab of tabs) {
+    open([tab.url], [tab.id]);
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
 }
 
-chrome.action.onClicked.addListener(() => {
-  chrome.tabs.query({
+chrome.action.onClicked.addListener(async () => {
+  const tabs = await chrome.tabs.query({
     active: true,
     currentWindow: true
-  }, tabs => open(tabs.map(t => t.url), tabs.map(t => t.id)));
+  });
+  open(tabs.map(t => t.url), tabs.map(t => t.id));
 });
 // context menu
 {
   const callback = () => {
+    if (callback.once) {
+      return;
+    }
+    callback.once = true;
+
     chrome.contextMenus.create({
       id: 'open-current',
       title: app.locale.current,
