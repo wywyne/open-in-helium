@@ -1,0 +1,63 @@
+{
+  "name": "Open in Helium Browser",
+  "description": "Open the current tab or all tabs in Helium browser or send links to Helium from right-click context menu.",
+  "version": "0.2.4",
+  "manifest_version": 3,
+  "permissions": [
+    "storage",
+    "tabs",
+    "contextMenus",
+    "nativeMessaging"
+  ],
+  "optional_permissions": [
+    "downloads"
+  ],
+  "icons": {
+    "16": "data/icons/16.png",
+    "32": "data/icons/32.png",
+    "48": "data/icons/48.png",
+    "64": "data/icons/64.png",
+    "128": "data/icons/128.png",
+    "256": "data/icons/256.png",
+    "512": "data/icons/512.png"
+  },
+  "background": {
+    "service_worker": "worker.js",
+    "scripts": ["config.js", "worker.js"]
+  },
+  "storage": {
+    "managed_schema": "schema.json"
+  },
+  "action": {},
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["data/script/isolated.js"],
+    "run_at": "document_start",
+    "all_frames": true,
+    "match_about_blank": true,
+    "world": "ISOLATED"
+  }, {
+    "matches": ["<all_urls>"],
+    "js": ["data/script/main.js"],
+    "run_at": "document_start",
+    "all_frames": true,
+    "match_about_blank": true,
+    "world": "MAIN"
+  }],
+  "options_ui": {
+    "page": "data/options/index.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "_execute_action": {}
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{f3c1e0d5-4a2b-4e7f-8c6b-9f1e2d3a4b5c}",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
+}
