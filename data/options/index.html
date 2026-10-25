@@ -7,7 +7,7 @@
 </head>
 
 <body>
-  <h2>Open With Keyboard-Mouse-Click Combinations</h2>
+  <h2>Open With <a target="_blank" data-href="faq7">Keyboard-Mouse-Click</a> Combinations</h2>
   <table class="tbl">
     <tr>
       <td><label for="enabled">Enabled</label></td>
@@ -33,33 +33,35 @@
   <h2>Open with Left-Click</h2>
   <table class="tbl">
     <tr>
-      <td colspan="2" style="text-align: left; white-space: normal;">Comma-separated list of domains to open with Helium browser when the link is opened with left-click<sup>1</sup></td>
+      <td colspan="2" style="text-align: left; white-space: normal;">Comma-separated <a data-href="faq16" target="_blank">list of domains</a> to open with Helium browser when the link is opened with left-click<sup>1</sup></td>
     </tr>
     <tr>
       <td colspan="2"><textarea id="hosts" style="width: 100%" rows="3" placeholder="e.g.: www.google.com, bing.com"></textarea></td>
     </tr>
     <tr>
-      <td colspan="2" style="text-align: left; white-space: normal;">Comma-separated list of URLs to open with Helium browser when the link is opened with left-click. Use URL Pattern's compatible format for complex matching patterns.<sup>1</sup></td>
+      <td colspan="2" style="text-align: left; white-space: normal;">Comma-separated list of URLs to open with Helium browser when the link is opened with left-click. Use the <a target="_blank" data-href="faq26">URL Pattern</a>'s compatible format for complex matching patterns.<sup>1</sup></td>
     </tr>
     <tr>
       <td colspan="2"><textarea id="urls" style="width: 100%" rows="3" placeholder="e.g.: https://www.google.com/, https://bing.com/"></textarea></td>
     </tr>
   </table>
   <div class="grid">
-    <label for="reverse">Reverse Mode<sup>5</sup></label>
+    <label for="reverse"><a data-href="faq24" target="_blank">Reverse Mode<sup>5</sup></a></label>
     <input type="checkbox" id="reverse">
     <label for="topRedict">Consider even top-level navigation<sup>6</sup></label>
     <input type="checkbox" id="topRedict">
   </div>
   <h2>Open with Click Event</h2>
   <textarea id="custom-script" rows="4" style="width: 100%" placeholder="this script gets executed on each page click"></textarea>
-  <p>Script is executed on each page click.</p>
+  <p><a data-href="faq28" target="_blank">Read more</a> about how to write the script</p>
   <h2>Misc</h2>
   <div class="grid">
     <label for="closeme">Close the source tab when link is pushed</label>
     <input type="checkbox" id="closeme">
     <label for="multiple">Open multiple links at once<sup>3</sup></label>
     <input type="checkbox" id="multiple">
+    <label for="faqs">Open FAQs page on updates</label>
+    <input type="checkbox" id="faqs">
   </div>
   <div>
     <span style="margin-top: 10px; margin-bottom: 5px; display: block">Path to the executable<sup>2</sup>:</span>
@@ -68,17 +70,20 @@
     </div>
   </div>
 
-  <div class="admin">Some preferences can be pre-configured by the domain administrator.</div>
+  <p>
+    <a href="https://peter.sh/experiments/chromium-command-line-switches/" target="_blank">List of Chromium-compatible Command Line Switches</a>
+  </p>
+  <div class="admin">Some of the preferences of this extension can be pre-configured by <a data-href="faq17" target="_blank">the domain administrator</a></div>
 
   <p>
     <button id="reset">Reset Settings</button>
-    <button id="save">Save Options</button>
+    <button id="support">Support Development</button> - <button id="save">Save Options</button>
     <span id="status"></span>
   </p>
 
   <hr style="margin: 10px 0">
   <ol>
-    <li>It is possible to use "managed storage" to set the default host and URL list for administrators.</li>
+    <li>It is possible to use "managed storage" to set the default host and URL list. This is useful for administrators to force opening a set of URLs or hostnames in another browser. Instruction on how to setup the managed storage can be found in the FAQs page.</li>
     <li>On Windows, if the path to the executable is not provided (is empty) <code id="l2"></code> is used. On Linux, if the path is not set, it is assumed <code id="l3"></code> binary can be found in the global PATH environment. On Mac OS, <code>open -a</code> command is used (with <code id="l4"></code> as the application or whatever is in the input).</li>
     <li>By activating this option all the requested URLs are sent to the external executable at once. Only activate this option if the external executable is capable of handling this type of requests.</li>
     <li>Not all key combinations are allowed in all operating systems.</li>

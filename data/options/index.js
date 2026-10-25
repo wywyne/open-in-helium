@@ -22,6 +22,7 @@ async function restore() {
     'ctrlKey': false,
     'metaKey': false,
     'button': 0,
+    'faqs': true,
     'closeme': false,
     'multiple': app.multiple,
     'hosts': [],
@@ -37,6 +38,7 @@ async function restore() {
   get('ctrlKey').checked = prefs.ctrlKey;
   get('metaKey').checked = prefs.metaKey;
   get('button').selectedIndex = prefs.button;
+  get('faqs').checked = prefs.faqs;
   get('closeme').checked = prefs.closeme;
   get('multiple').checked = prefs.multiple;
   get('hosts').value = prefs.hosts.join(', ');
@@ -55,6 +57,7 @@ async function save() {
   const ctrlKey = get('ctrlKey').checked;
   const metaKey = get('metaKey').checked;
   const button = get('button').selectedIndex;
+  const faqs = get('faqs').checked;
   const closeme = get('closeme').checked;
   const multiple = get('multiple').checked;
   const hosts = get('hosts').value;
@@ -70,6 +73,7 @@ async function save() {
     ctrlKey,
     metaKey,
     button,
+    faqs,
     closeme,
     multiple,
     reverse,
@@ -87,6 +91,11 @@ async function save() {
 }
 get('save').addEventListener('click', save);
 
+
+// Support
+get('support').addEventListener('click', () => chrome.tabs.create({
+  url: chrome.runtime.getManifest().homepage_url + '&rd=donate'
+}));
 // Factory Reset
 get('reset').addEventListener('click', e => {
   if (e.detail === 1) {
@@ -100,6 +109,13 @@ get('reset').addEventListener('click', e => {
     });
   }
 });
+
+// Links
+for (const a of [...document.querySelectorAll('[data-href]')]) {
+  if (a.hasAttribute('href') === false) {
+    a.href = chrome.runtime.getManifest().homepage_url + '#' + a.dataset.href;
+  }
+}
 
 // Localization
 get('path').placeholder = app.locale.example;

@@ -20,6 +20,10 @@
     "reverse": {
       "title": "Enable reversed mode",
       "type": "boolean"
+    },
+    "faqs": {
+      "title": "Open homepage on updates",
+      "type": "boolean"
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "Open in Helium Browser",
   "description": "Open the current tab or all tabs in Helium browser or send links to Helium from right-click context menu.",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "manifest_version": 3,
   "permissions": [
     "storage",
@@ -28,6 +28,7 @@
   "storage": {
     "managed_schema": "schema.json"
   },
+  "homepage_url": "https://webextension.org/listing/open-in.html?from=helium",
   "action": {},
   "content_scripts": [{
     "matches": ["<all_urls>"],
@@ -54,10 +55,13 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "{f3c1e0d5-4a2b-4e7f-8c6b-9f1e2d3a4b5c}",
-      "strict_min_version": "128.0",
+      "strict_min_version": "140.0",
       "data_collection_permissions": {
         "required": ["none"]
       }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
     }
   }
 }
